@@ -1,0 +1,12 @@
+(LOOP)
+@KBD
+D=M	
+@135
+D=D-A
+@END
+D;JEQ
+@LOOP
+0;JMP
+(END)
+@END
+0;JMP
