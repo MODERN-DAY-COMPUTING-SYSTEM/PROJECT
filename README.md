@@ -13,7 +13,10 @@ Now we construct the ram using 16 d flip flops to make 16 bit register. We also 
 [11:44 am, 28/3/2026] dhruvsud123@icloud.com: we can read write and access data in any 16000s of the registers present in out RAM.<br/>
 [11:44 am, 28/3/2026] dhruvsud123@icloud.com: 32KB RAM is there in total.<br/> 
 <br />
-thank you for now bi bye <br />
+[1:04 am, 6/5/2026] dhruvsud123@icloud.com: We have completed assembling our Computer architecture based inspired by Harvard Architecture of CPU<br/>
+[1:06 am, 6/5/2026] dhruvsud123@icloud.com: Our CPU now contains 64kB RAM, 64 kB ROM, ALU, Buses, Data Register, Address Register, Jump Logic(Loop goto logic), Program Counter etc.<br/>
+[1:06 am, 6/5/2026] dhruvsud123@icloud.com: All these components whren working together make our assembly code execute and produce the desired results with falling edge of each clock cycle.<br/>
+PART1 of the project ALMOST DONE.
 
 
 
