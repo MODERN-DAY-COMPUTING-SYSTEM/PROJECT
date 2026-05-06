@@ -1,0 +1,5 @@
+Research Paper contains appropriate library
+https://dl.acm.org/doi/epdf/10.1145/3587102.3588858
+
+Screen Keyboard github
+https://github.com/dhnam/n2tLogisimIO
