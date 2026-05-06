@@ -1,53 +1,129 @@
-# PROJECT <br />
-We are working with 16 bit data buses so each data bit requires it own individual elementary gate <br />
-We are following the abstraction implementation approach <br />
-So first we abstract the idea from the truth table and k maps and then implement the function using elementary logic gates <br />
-then we can use these implemented chips that we made as abstractions in form of chipset apis <br />
-thats what we have done here throughout the project <br />
-THE WHOLE PROJECT IS BASED ON IMPLEMENTATION ANSTRACTION APPROACH USED FOR COUNTLESS CENTURIES <br />
-important:: Also recognising the unique property that only 0 have bits when added among together produce 0 carry and sum when oring together produce 0 and every no except 0 this fact doesnt hold true we were able ofy and 1ify the mux select lines and create zr op. And observing the MSB is enough to create the ng op. <br />
-Now we construct the ram using 16 d flip flops to make 16 bit register. We also make a RAM8.<br />
-[11:39 am, 28/3/2026]  Our CPU has 32kBs of ram that is enough for a 16 bit machine to run a simple unsophisticated OS.<br/>
-[11:41 am, 28/3/2026] dhruvsud123@icloud.com: we can now store 262144 bits that is 32kbs of DATA in 16384 different locations simultaneously.<br/>
-[11:41 am, 28/3/2026] dhruvsud123@icloud.com: 32.768 kBs of DATA  = 32 kB RAM<br/>
-[11:44 am, 28/3/2026] dhruvsud123@icloud.com: we can read write and access data in any 16000s of the registers present in out RAM.<br/>
-[11:44 am, 28/3/2026] dhruvsud123@icloud.com: 32KB RAM is there in total.<br/> 
-<br />
-[1:04 am, 6/5/2026] dhruvsud123@icloud.com: We have completed assembling our Computer architecture based inspired by Harvard Architecture of CPU<br/>
-[1:06 am, 6/5/2026] dhruvsud123@icloud.com: Our CPU now contains 64kB RAM, 64 kB ROM, ALU, Buses, Data Register, Address Register, Jump Logic(Loop goto logic), Program Counter etc.<br/>
-[1:06 am, 6/5/2026] dhruvsud123@icloud.com: All these components whren working together make our assembly code execute and produce the desired results with falling edge of each clock cycle.<br/>
-PART1 of the project ALMOST DONE.
+# 🖥️ Modern Day Computing System — 16-bit Computer Architecture Project
 
+## 📌 Overview
 
+This project is a ground-up implementation of a **16-bit computer architecture**, built using fundamental digital logic principles. The system is designed by strictly following the **abstraction → implementation methodology**, a core concept used in computer engineering for decades.
 
+Instead of relying on pre-built components, every module in this system is constructed from **elementary logic gates**, gradually abstracted into higher-level components such as registers, memory units, and ultimately a fully functional CPU.
 
+---
 
+## 🧠 Design Philosophy
 
+### 🔹 Abstraction → Implementation Approach
 
+The entire system is built using a layered design strategy:
 
+1. **Truth Tables & K-Maps** → Define logical behavior
+2. **Gate-Level Implementation** → Build circuits using basic gates
+3. **Chip-Level Abstraction** → Combine circuits into reusable modules
+4. **System Integration** → Assemble modules into a working computer
 
+Each constructed component is reused as an abstraction (API-like building block), enabling scalable and modular design.
 
+---
 
+## ⚙️ Core Concepts & Optimizations
 
+* **16-bit Data Bus Architecture**
+  Each bit is processed independently using dedicated logic gates.
 
+* **Efficient ALU Flag Design**
 
+  * `zr (zero flag)` is derived using the property that only **zero produces zero in both OR and ADD operations consistently**.
+  * `ng (negative flag)` is determined directly from the **most significant bit (MSB)**.
 
+* **MUX Optimization**
+  Leveraging binary properties to simplify select-line logic, reducing gate complexity.
 
+---
 
+## 🧩 Components Implemented
 
+### 🔸 Memory System
 
+* **16-bit Register** → Built using 16 D Flip-Flops
 
+* **RAM8** → Basic memory unit
 
+* **Full RAM System**
 
+  * **Capacity:** 32 KB → Extended to **64 KB**
+  * **Addressable Locations:** 16,384 (initial) → Expanded in final design
+  * **Total Storage:**
 
+    * 32 KB = 262,144 bits
+    * 64 KB (final system)
 
+* Supports **simultaneous addressing and sequential read/write operations**
 
+---
 
+### 🔸 CPU Architecture
 
+Inspired by a **Harvard Architecture**, separating instruction and data memory.
 
+#### Includes:
 
+* 🧮 **ALU (Arithmetic Logic Unit)**
+* 📦 **Data Register**
+* 📍 **Address Register**
+* 🔁 **Program Counter (PC)**
+* 🔀 **Jump Logic (Loop / GOTO Control)**
+* 🔌 **System Buses**
+* 💾 **ROM (64 KB)**
+* 🧠 **RAM (64 KB)**
 
+---
 
+## ⏱️ Execution Model
 
+* The system operates on a **clock-driven mechanism**
+* Instructions are executed on the **falling edge of each clock cycle**
+* Ensures synchronized and predictable behavior across all components
 
+---
 
+## 🚀 Current Status
+
+✅ Core architecture design complete
+✅ Memory and CPU modules implemented
+✅ Instruction execution functional
+🔄 **Part 1: Nearly Complete**
+
+---
+
+## 📚 What This Project Demonstrates
+
+* Building a computer from **first principles**
+* Deep understanding of:
+
+  * Digital logic design
+  * Memory architecture
+  * CPU organization
+* Practical application of abstraction in hardware design
+
+---
+
+## 🔮 Future Scope
+
+* Instruction set expansion
+* Basic operating system support
+* I/O integration (Display, Keyboard, etc.)
+* Performance optimizations
+
+---
+
+## 👨‍💻 Author
+
+**Dhruv Sud**
+
+---
+
+## 📄 License
+
+This project is open-source and available for learning and educational purposes.
+
+---
+
+> *“From logic gates to a working CPU — this project is a journey through the fundamentals of computing.”*
