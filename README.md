@@ -161,6 +161,14 @@ The memory subsystem contains multiple RAM implementations and addressing logic.
   <img src="./MEMORY/8RAM.png" width="750"/>
 </p>
 
+# Program Counter
+
+The program counter tells the ROM which instruction to fetch hence implementing jump logic.
+
+<p align="center">
+  <img src="./MEMORY/program_counter.png" width="750"/>
+</p>
+
 ### Features
 
 * 8 RAM architecture
@@ -179,6 +187,7 @@ The memory subsystem contains multiple RAM implementations and addressing logic.
 # Assembler
 
 A custom assembler written in Java converts assembly instructions into executable machine code.
+Put your .asm code in Code.asm file and then run the assembler and then run the hexadecimal converter for logisim. You can also run test scripts.
 
 ### Main Files
 
@@ -199,7 +208,7 @@ TestScript.java
 
 ```bash
 cd Assembler
-javac *.java
+javac Assembler.java
 ```
 
 ### Run
