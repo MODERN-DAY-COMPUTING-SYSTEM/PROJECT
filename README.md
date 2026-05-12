@@ -384,7 +384,6 @@ This project is licensed under the MIT License.
 Feel free to use, study, modify, and distribute this project for educational and research purposes.
 
 ---
-<br>
 <p align="center">
   <b>Author : Dhruv Sud</b>
 </p>
