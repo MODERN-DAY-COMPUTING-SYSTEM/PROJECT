@@ -1,7 +1,7 @@
 (LOOP)
 @KBD
 D=M	
-@135
+@65
 D=D-A
 @END
 D;JEQ

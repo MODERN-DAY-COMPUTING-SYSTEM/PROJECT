@@ -264,6 +264,8 @@ public class Assembler {
             // f.y.i. empty lines are also not allowed .contains(''|''|''|'')
             // Revealation: Empty lines are handled automatically , idk man really idk it works!
             // Alright Let me also allow empty lines
+            // Update : This doesn't work 2 weeks later
+            // Be careful y'all
             if(original.charAt(i) == ' '){
                 break;
             }
@@ -326,7 +328,7 @@ public class Assembler {
         ArrayList<String> keyWords = new ArrayList<String>();
         String[] keywords = {"R0;0", "R1;1", "R2;2", "R3;3", "R4;4", "R5;5", "R6;6", "R7;7",
                              "R8;8", "R9;9", "R10;10", "R11;11", "R12;12", "R13;13", "R14;14",
-                             "R15;15", "SCREEN;16384", "KBD;24576", "SP;0", "LCL;1", "ARG;2",
+                             "R15;15", "SCREEN;16384", "KBD;20481", "SP;0", "LCL;1", "ARG;2",
                              "THIS;3", "THAT;4" };
         
         for(int i = 0; i <= keywords.length -1; i++){
