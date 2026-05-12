@@ -1,129 +1,382 @@
-# 🖥️ Modern Day Computing System — 16-bit Computer Architecture Project
+# MODERN DAY COMPUTING SYSTEM
 
-## 📌 Overview
+<p align="center">
+  <img src="./COMPUTER/Model1.png" width="900"/>
+</p>
 
-This project is a ground-up implementation of a **16-bit computer architecture**, built using fundamental digital logic principles. The system is designed by strictly following the **abstraction → implementation methodology**, a core concept used in computer engineering for decades.
+<h1 align="center">MODERN DAY COMPUTING SYSTEM</h1>
 
-Instead of relying on pre-built components, every module in this system is constructed from **elementary logic gates**, gradually abstracted into higher-level components such as registers, memory units, and ultimately a fully functional CPU.
+<p align="center">
+  A complete 16-bit computer architecture built from scratch using digital logic, hardware simulation, assembly language, and low-level systems design.
+</p>
 
----
-
-## 🧠 Design Philosophy
-
-### 🔹 Abstraction → Implementation Approach
-
-The entire system is built using a layered design strategy:
-
-1. **Truth Tables & K-Maps** → Define logical behavior
-2. **Gate-Level Implementation** → Build circuits using basic gates
-3. **Chip-Level Abstraction** → Combine circuits into reusable modules
-4. **System Integration** → Assemble modules into a working computer
-
-Each constructed component is reused as an abstraction (API-like building block), enabling scalable and modular design.
+<p align="center">
+  <img src="https://img.shields.io/badge/Architecture-16--Bit-blue?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/Built%20With-Logisim-green?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/Language-Java-orange?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/Assembler-Custom-red?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/Status-Work%20In%20Progress-yellow?style=for-the-badge"/>
+</p>
 
 ---
 
-## ⚙️ Core Concepts & Optimizations
+# About The Project
 
-* **16-bit Data Bus Architecture**
-  Each bit is processed independently using dedicated logic gates.
+This project is a deep exploration into how computers actually work internally.
 
-* **Efficient ALU Flag Design**
+Instead of treating the computer as a black box, this repository focuses on building an entire computing system from the ground up:
 
-  * `zr (zero flag)` is derived using the property that only **zero produces zero in both OR and ADD operations consistently**.
-  * `ng (negative flag)` is determined directly from the **most significant bit (MSB)**.
+* Logic Gates
+* Arithmetic Units
+* CPU Design
+* Memory Systems
+* Instruction Execution
+* Assembly Language
+* Hardware Simulation
+* Memory-Mapped I/O
 
-* **MUX Optimization**
-  Leveraging binary properties to simplify select-line logic, reducing gate complexity.
+The project is heavily inspired by:
 
----
-
-## 🧩 Components Implemented
-
-### 🔸 Memory System
-
-* **16-bit Register** → Built using 16 D Flip-Flops
-
-* **RAM8** → Basic memory unit
-
-* **Full RAM System**
-
-  * **Capacity:** 32 KB → Extended to **64 KB**
-  * **Addressable Locations:** 16,384 (initial) → Expanded in final design
-  * **Total Storage:**
-
-    * 32 KB = 262,144 bits
-    * 64 KB (final system)
-
-* Supports **simultaneous addressing and sequential read/write operations**
+* The Elements of Computing Systems
+* classical computer engineering
+* low-level architecture design
+* educational hardware projects
 
 ---
 
-### 🔸 CPU Architecture
+# Project Goals
 
-Inspired by a **Harvard Architecture**, separating instruction and data memory.
-
-#### Includes:
-
-* 🧮 **ALU (Arithmetic Logic Unit)**
-* 📦 **Data Register**
-* 📍 **Address Register**
-* 🔁 **Program Counter (PC)**
-* 🔀 **Jump Logic (Loop / GOTO Control)**
-* 🔌 **System Buses**
-* 💾 **ROM (64 KB)**
-* 🧠 **RAM (64 KB)**
+* Build a fully functional 16-bit computer architecture
+* Understand instruction execution at hardware level
+* Design memory systems from scratch
+* Implement a custom assembler
+* Explore framebuffer and display systems
+* Experiment with keyboard I/O
+* Learn how software communicates with hardware
+* Build a foundation for future OS development
 
 ---
 
-## ⏱️ Execution Model
+# System Architecture
 
-* The system operates on a **clock-driven mechanism**
-* Instructions are executed on the **falling edge of each clock cycle**
-* Ensures synchronized and predictable behavior across all components
-
----
-
-## 🚀 Current Status
-
-✅ Core architecture design complete
-✅ Memory and CPU modules implemented
-✅ Instruction execution functional
-🔄 **Part 1: Nearly Complete**
-
----
-
-## 📚 What This Project Demonstrates
-
-* Building a computer from **first principles**
-* Deep understanding of:
-
-  * Digital logic design
-  * Memory architecture
-  * CPU organization
-* Practical application of abstraction in hardware design
-
----
-
-## 🔮 Future Scope
-
-* Instruction set expansion
-* Basic operating system support
-* I/O integration (Display, Keyboard, etc.)
-* Performance optimizations
-
----
-
-## 👨‍💻 Author
-
-**Dhruv Sud**
+```text
+                    ┌─────────────────────┐
+                    │  Assembly Programs  │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │   Java Assembler    │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │    Machine Code     │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+┌──────────────────────────────────────────────────────────┐
+│                          CPU                             │
+│                                                          │
+│   ┌────────────┐     ┌────────────┐     ┌────────────┐   │
+│   │ Registers  │────▶│    ALU     │────▶│ Jump Logic │   │
+│   └────────────┘     └────────────┘     └────────────┘   │
+│                                                          │
+└──────────────────────────┬───────────────────────────────┘
+                           │
+          ┌────────────────┴────────────────┐
+          ▼                                 ▼
+┌──────────────────┐          ┌────────────────────────┐
+│       RAM        │          │   Memory Mapped I/O    │
+│                  │          │  Screen / Keyboard     │
+└──────────────────┘          └────────────────────────┘
+```
 
 ---
 
-## 📄 License
+# Repository Structure
 
-This project is open-source and available for learning and educational purposes.
+```text
+.
+├── ALU/                  # Arithmetic Logic Unit implementation
+├── Assembler/            # Java-based assembler
+├── assembly_programs/    # Assembly language programs
+├── Backup/               # Backup circuit designs
+├── Books/                # Reference books and PDFs
+├── COMPUTER/             # Complete computer model
+├── Course Work/          # Academic work and poster
+├── CPU/                  # CPU architecture and debugging
+├── Keyboard/             # Keyboard subsystem visuals
+├── Libraries/            # External Logisim libraries
+├── MEMORY/               # RAM and memory architecture
+├── Screen/               # Display subsystem
+├── README.md
+└── refrences.txt
+```
 
 ---
 
-> *“From logic gates to a working CPU — this project is a journey through the fundamentals of computing.”*
+# Core Components
+
+# CPU
+
+The CPU is responsible for:
+
+* instruction decoding
+* arithmetic execution
+* jump control
+* register management
+* memory interaction
+
+### CPU Design
+
+<p align="center">
+  <img src="./CPU/CPU.png" width="850"/>
+</p>
+
+---
+
+# Arithmetic Logic Unit (ALU)
+
+The ALU performs arithmetic and logical operations on 16-bit values.
+
+### Includes
+
+* 16-bit Adder
+* Multiplexers
+* Arithmetic circuits
+* Logic operation units
+
+<p align="center">
+  <img src="./ALU/alu.png" width="750"/>
+</p>
+
+---
+
+# Memory Architecture
+
+The memory subsystem contains multiple RAM implementations and addressing logic.
+
+<p align="center">
+  <img src="./MEMORY/8RAM.png" width="750"/>
+</p>
+
+### Features
+
+* 8 RAM architecture
+* 64KB ROM & RAM design
+* Program Counter
+* Registers
+* Address decoding
+* Synchronization experiments
+
+<p align="center">
+  <img src="./MEMORY/RAM(32kBs).png" width="850"/>
+</p>
+
+---
+
+# Assembler
+
+A custom assembler written in Java converts assembly instructions into executable machine code.
+
+### Main Files
+
+```text
+Assembler.java
+HexaDecimalConverter.java
+TestScript.java
+```
+
+### Features
+
+* Assembly parsing
+* Binary instruction generation
+* Hex conversion
+* ROM-ready output generation
+
+### Compile
+
+```bash
+cd Assembler
+javac *.java
+```
+
+### Run
+
+```bash
+java Assembler
+```
+
+---
+
+# Assembly Programs
+
+The repository contains multiple low-level programs for testing the architecture.
+
+| Program             | Description                   |
+| ------------------- | ----------------------------- |
+| `bitmap.asm`        | Bitmap graphics experiments   |
+| `fibonacci.asm`     | Fibonacci sequence            |
+| `keyboard.asm`      | Keyboard interaction          |
+| `MAX.asm`           | Maximum value computation     |
+| `RGB.asm`           | RGB framebuffer testing       |
+| `pointer_array.asm` | Pointer and array experiments |
+| `rom_execution.asm` | ROM execution testing         |
+
+---
+
+# Display & I/O Experiments
+
+The project also explores:
+
+* framebuffer concepts
+* screen memory mapping
+* RGB graphics
+* keyboard interfacing
+* unconventional synchronization techniques
+
+<p align="center">
+  <img src="./Screen/Screen.png" width="750"/>
+</p>
+
+---
+
+# Keyboard Model
+
+<p align="center">
+  <img src="./Keyboard/Keyboard.png" width="900"/>
+</p>
+
+---
+
+# Technologies Used
+
+| Technology        | Purpose                  |
+| ----------------- | ------------------------ |
+| Logisim           | Hardware simulation      |
+| Java              | Assembler implementation |
+| Assembly Language | Low-level programming    |
+| Digital Logic     | Hardware architecture    |
+
+---
+
+# Learning Objectives
+
+This repository is designed to teach and explore:
+
+* computer architecture
+* digital electronics
+* CPU execution cycles
+* memory systems
+* machine code
+* assembly language
+* memory mapped I/O
+* hardware-software interaction
+
+---
+
+# Books & References
+
+### Primary References
+
+* The Elements of Computing Systems
+* Digital Computer Electronics
+
+---
+
+# Getting Started
+
+## Requirements
+
+* Java JDK
+* Logisim
+
+---
+
+## Clone Repository
+
+```bash
+git clone https://github.com/MODERN-DAY-COMPUTING-SYSTEM/PROJECT.git
+```
+
+---
+
+## Open Circuits
+
+Use Logisim to open `.circ` files.
+
+Example:
+
+```text
+CPU/CPU.circ
+ALU/adder.circ
+MEMORY/RAM32kB.circ
+```
+
+---
+
+# Future Development
+
+Planned improvements include:
+
+* VGA-style video output
+* better screen rendering
+* hardware debugger improvements
+* ROM bootloader
+* keyboard buffering
+* custom instruction extensions
+* simple operating system experiments
+* compiler backend exploration
+* graphics acceleration concepts
+
+---
+
+# Why Build A Computer From Scratch?
+
+Because understanding modern computing requires understanding what happens underneath:
+
+* how instructions are executed,
+* how memory stores data,
+* how CPUs communicate internally,
+* how displays are rendered,
+* and how software becomes electrical activity.
+
+This project exists to explore computing at its lowest meaningful level.
+
+---
+
+# Contributing
+
+Contributions are welcome.
+
+Areas where contributions would help:
+
+* circuit optimization
+* documentation
+* graphics subsystem
+* debugging tools
+* assembly examples
+* architecture improvements
+
+---
+
+# Acknowledgements
+
+Inspired by:
+
+* Nand2Tetris
+* low-level systems engineering communities
+* classic computer architecture literature
+
+# License
+
+This project is licensed under the MIT License.
+
+Feel free to use, study, modify, and distribute this project for educational and research purposes.
+
+---
+<br>
+<p align="center">
+  <b>Author : Dhruv Sud</b>
+</p>
