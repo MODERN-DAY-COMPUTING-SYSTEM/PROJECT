@@ -205,7 +205,7 @@ javac *.java
 ### Run
 
 ```bash
-java Assembler
+java Assembler > output.hack
 ```
 
 ---
