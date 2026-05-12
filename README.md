@@ -313,14 +313,14 @@ git clone https://github.com/MODERN-DAY-COMPUTING-SYSTEM/PROJECT.git
 
 ## Open Circuits
 
-Use Logisim to open `.circ` files.
+Use Logisim-Evolution to open `.circ` files.
 
 Example:
 
-```text
-CPU/CPU.circ
-ALU/adder.circ
-MEMORY/RAM32kB.circ
+```bash
+logisim-evolution CPU/CPU.circ
+logisim-evolution ALU/adder.circ
+logisim-evolution MEMORY/RAM32kB.circ
 ```
 
 ---
@@ -330,9 +330,8 @@ MEMORY/RAM32kB.circ
 Planned improvements include:
 
 * VGA-style video output
-* better screen rendering
+* Faster system 
 * hardware debugger improvements
-* ROM bootloader
 * keyboard buffering
 * custom instruction extensions
 * simple operating system experiments
