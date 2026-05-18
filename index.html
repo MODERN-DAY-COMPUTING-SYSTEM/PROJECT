@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>RGB565 Bitmap Editor</title>
+<title>RGB555 Bitmap Editor</title>
 <style>
   :root{--bg:#f0f0f0;--surface:#fff;--border:#ccc;--text:#222;--subtext:#888;--active-bg:#ddeeff;--active-border:#5588cc;--active-text:#1155aa;--btn-bg:#f5f5f5;--btn-hover:#e8e8e8;--grid-line:#ccc;--pixel-empty:#fff;--asm-bg:#1a1a1a;--asm-text:#88dd88;}
   .dark{--bg:#111;--surface:#1a1a1a;--border:#333;--text:#ddd;--subtext:#666;--active-bg:#1a3a6a;--active-border:#5588cc;--active-text:#88bbff;--btn-bg:#222;--btn-hover:#2a2a2a;--grid-line:#2a2a2a;--pixel-empty:#0d0d0d;--asm-bg:#0a0a0a;--asm-text:#88dd88;}
@@ -99,7 +99,7 @@
     <div id="picker-wrap">
       <input type="color" id="cpick" value="#ff0000">
       <div id="color-info">
-        <span>RGB565 </span><b id="ci-565">—</b><br>
+        <span>RGB555 </span><b id="ci-565">—</b><br>
         <span>Dec&nbsp;&nbsp;&nbsp; </span><b id="ci-dec">—</b><br>
         <span>Binary </span><b id="ci-bin">—</b>
       </div>
@@ -318,8 +318,8 @@ container.addEventListener('mouseleave',()=>clearOverlay());
 document.addEventListener('mouseup',()=>painting=false);
 
 function hexToRGB(h){const n=parseInt(h.slice(1),16);return[(n>>16)&255,(n>>8)&255,n&255];}
-function rgbToRGB565(r,g,b){return(((r>>3)&0x1F)<<11)|(((g>>2)&0x3F)<<5)|((b>>3)&0x1F);}
-function rgb565ToCSS(v){const r=((v>>11)&0x1F)*255/31|0,g=((v>>5)&0x3F)*255/63|0,b=(v&0x1F)*255/31|0;return`rgb(${r},${g},${b})`;}
+function rgbToRGB565(r,g,b){return(((r>>3)&0x1F)<<10)|(((g>>3)&0x1F)<<5)|((b>>3)&0x1F);}
+function rgb565ToCSS(v){const r=((v>>10)&0x1F)*255/31|0,g=((v>>5)&0x1F)*255/31|0,b=(v&0x1F)*255/31|0;return`rgb(${r},${g},${b})`;}
 function getColor565(){const[r,g,b]=hexToRGB(document.getElementById('cpick').value);return rgbToRGB565(r,g,b);}
 function getColorCSS(){const v=getColor565();return rgb565ToCSS(v);}
 
@@ -538,7 +538,7 @@ function updateAsm(){
   if(!painted.length){document.getElementById('asm-out').textContent='// Paint pixels to generate code';stats.textContent='';return;}
   const byColor=new Map();
   for(const[idx,color]of painted){if(!byColor.has(color))byColor.set(color,[]);byColor.get(color).push(idx);}
-  const lines=[`// RGB565 Bitmap — ${painted.length} pixel(s)`,`// Framebuffer base: ${FB}`,``];
+  const lines=[`// RGB555 Bitmap — ${painted.length} pixel(s)`,`// Framebuffer base: ${FB}`,``];
   for(const[color,indices]of byColor){
     lines.push(`// Color 0x${color.toString(16).toUpperCase().padStart(4,'0')} — ${indices.length} px`);
     lines.push(`@${color}`,`D=A`);
@@ -693,4 +693,3 @@ gridEl.classList.add('segmented');
 </script>
 </body>
 </html>
-
