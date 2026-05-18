@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>RGB565 Bitmap Editor</title>
+<style>
+  :root{--bg:#f0f0f0;--surface:#fff;--border:#ccc;--text:#222;--subtext:#888;--active-bg:#ddeeff;--active-border:#5588cc;--active-text:#1155aa;--btn-bg:#f5f5f5;--btn-hover:#e8e8e8;--grid-line:#ccc;--pixel-empty:#fff;--asm-bg:#1a1a1a;--asm-text:#88dd88;}
+  .dark{--bg:#111;--surface:#1a1a1a;--border:#333;--text:#ddd;--subtext:#666;--active-bg:#1a3a6a;--active-border:#5588cc;--active-text:#88bbff;--btn-bg:#222;--btn-hover:#2a2a2a;--grid-line:#2a2a2a;--pixel-empty:#0d0d0d;--asm-bg:#0a0a0a;--asm-text:#88dd88;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:monospace;display:flex;gap:12px;padding:12px;height:100vh;overflow:hidden;font-size:13px;transition:background .2s,color .2s;}
+  #left{display:flex;flex-direction:column;gap:5px;flex-shrink:0;}
+  
+  #header-wrap {display:flex;align-items:center;gap:10px;margin-bottom:5px;}
+  #logo-svg {width:24px;height:24px;flex-shrink:0;}
+  #main-heading{font-size:20px;font-weight:bold;letter-spacing:0.5px;color:var(--text);}
+  
+  #canvas-area{display:flex;}
+  #row-nums{display:flex;flex-direction:column;width:26px;margin-top:20px;flex-shrink:0;}
+  #row-nums span{height:8px;line-height:8px;font-size:7px;color:var(--subtext);text-align:right;padding-right:3px;}
+  #grid-wrap{display:flex;flex-direction:column;}
+  #col-nums{display:flex;height:20px;}
+  #col-nums span{width:8px;font-size:7px;color:var(--subtext);text-align:center;line-height:20px;transform:rotate(-90deg);transform-origin:center;display:inline-block;}
+  #canvas-container{position:relative;width:512px;height:512px;flex-shrink:0;}
+  #grid{display:grid;grid-template-columns:repeat(64,8px);grid-template-rows:repeat(64,8px);width:512px;height:512px;cursor:crosshair;image-rendering:pixelated;position:absolute;top:0;left:0;}
+  #grid.segmented{border-top:1px solid var(--grid-line);border-left:1px solid var(--grid-line);}
+  #grid.segmented .px{border-right:1px solid var(--grid-line);border-bottom:1px solid var(--grid-line);}
+  .px{width:8px;height:8px;background:var(--pixel-empty);}
+  #overlay{position:absolute;top:0;left:0;width:512px;height:512px;pointer-events:none;z-index:10;}
+  #coords{font-size:12px;color:var(--subtext);}
+  
+  #cur-addr-line{font-size:12px;color:var(--text);display:flex;align-items:center;gap:8px;margin-top:2px;}
+  #manual-addr-input{width:90px;padding:4px 8px;border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:4px;font-family:monospace;font-size:12px;}
+  #manual-addr-input:focus{outline:none;border-color:var(--active-border);}
+
+  #right{display:flex;flex-direction:column;gap:7px;width:265px;flex-shrink:0;overflow-y:auto;}
+  .box{border:1px solid var(--border);border-radius:6px;padding:9px 11px;background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.06);}
+  .box h3{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--subtext);margin-bottom:7px;}
+  #picker-wrap{display:flex;align-items:center;gap:10px;}
+  input[type=color]{width:52px;height:52px;border:2px solid var(--border);padding:2px;background:none;cursor:pointer;border-radius:6px;}
+  #color-info{font-size:12px;line-height:2;}
+  #color-info span{color:var(--subtext);}
+  #color-info b{color:var(--text);}
+  .tools{display:flex;gap:5px;flex-wrap:wrap;}
+  .btn{padding:4px 9px;border:1px solid var(--border);background:var(--btn-bg);color:var(--text);border-radius:5px;cursor:pointer;font-size:12px;font-family:monospace;transition:background .1s;}
+  .btn:hover{background:var(--btn-hover);}
+  .btn.active{background:var(--active-bg);border-color:var(--active-border);color:var(--active-text);font-weight:bold;}
+  .btn.red{border-color:#ffaaaa;color:#cc3333;}
+  .btn.red:hover{background:#ffeeee;}
+  #brush-row{display:flex;align-items:center;gap:7px;color:var(--subtext);margin-top:7px;font-size:12px;}
+  input[type=range]{flex:1;accent-color:#5588cc;}
+  input[type=number]{width:54px;padding:3px 5px;border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:4px;font-family:monospace;font-size:12px;}
+  select{padding:3px 5px;border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:4px;font-family:monospace;font-size:12px;cursor:pointer;}
+  .row2{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:6px;font-size:12px;color:var(--subtext);}
+  
+  #asm-box{width:250px;display:flex;flex-direction:column;flex-shrink:0;height:calc(100vh - 24px);}
+  #asm-box h3{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--subtext);margin-bottom:5px;}
+  #asm-out{flex:1;background:var(--asm-bg);border:1px solid var(--border);border-radius:5px;padding:8px;font-size:10px;line-height:1.6;color:var(--asm-text);overflow-y:auto;white-space:pre;font-family:monospace;min-height:100px;max-height:none;}
+  #asm-stats{font-size:11px;color:var(--subtext);margin-top:3px;}
+  
+  #graphics-panel {width:140px;display:flex;flex-direction:column;flex-shrink:0;height:calc(100vh - 24px);overflow:hidden;}
+  #graphics-panel h3 {font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--subtext);margin-bottom:7px;}
+  #anim-canvas {width:100%;flex:1;background:#050508;border-radius:4px;border:1px solid var(--border);image-rendering:pixelated;}
+  
+  #toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:#222;color:#fff;padding:9px 20px;border-radius:8px;font-size:13px;font-family:monospace;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:999;box-shadow:0 4px 12px rgba(0,0,0,.25);}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div id="toast">✓ Copied to clipboard!</div>
+<div id="left">
+  <div id="header-wrap">
+    <svg id="logo-svg" viewBox="0 0 24 24">
+      <rect x="2" y="2" width="20" height="20" rx="3" stroke="#000000" stroke-width="2" fill="#ffffff"/>
+      <rect x="6" y="6" width="12" height="12" rx="1" fill="#000000"/>
+    </svg>
+    <h1 id="main-heading">Bitmap Editor</h1>
+  </div>
+  <div id="canvas-area">
+    <div id="row-nums"></div>
+    <div id="grid-wrap">
+      <div id="col-nums"></div>
+      <div id="canvas-container">
+        <div id="grid" class="segmented"></div>
+        <svg id="overlay" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+    </div>
+  </div>
+  <div id="coords">x=— y=— | addr=—</div>
+  <div id="cur-addr-line">
+    <label for="manual-addr-input">Memory Address:</label>
+    <input type="text" id="manual-addr-input" placeholder="e.g. 16384" value="16384">
+    <button class="btn" onclick="blinkManualAddress()" style="padding:4px 10px;font-size:11px;">⚡ Blink Pixel</button>
+  </div>
+</div>
+
+<div id="right">
+  <div class="box">
+    <h3>Color</h3>
+    <div id="picker-wrap">
+      <input type="color" id="cpick" value="#ff0000">
+      <div id="color-info">
+        <span>RGB565 </span><b id="ci-565">—</b><br>
+        <span>Dec&nbsp;&nbsp;&nbsp; </span><b id="ci-dec">—</b><br>
+        <span>Binary </span><b id="ci-bin">—</b>
+      </div>
+    </div>
+  </div>
+
+  <div class="box">
+    <h3>Draw Tools</h3>
+    <div class="tools">
+      <button class="btn active" id="tb-draw" onclick="setTool('draw')">✏ Draw</button>
+      <button class="btn" id="tb-erase" onclick="setTool('erase')">⌫ Erase</button>
+      <button class="btn" id="tb-fill" onclick="setTool('fill')">▣ Fill</button>
+    </div>
+    <div id="brush-row">Brush <input type="range" id="brush" min="1" max="8" value="1"> <span id="bsz">1px</span></div>
+  </div>
+
+  <div class="box">
+    <h3>Insert Character</h3>
+    <div class="tools">
+      <select id="char-select"></select>
+      <button class="btn" id="tb-char" onclick="toggleCharMode()">⌨ Place</button>
+    </div>
+    <div id="char-hint" style="font-size:11px;color:var(--subtext);margin-top:5px;">Hover canvas → click to stamp. Color from picker.</div>
+  </div>
+
+  <div class="box">
+    <h3>Shapes</h3>
+    <div class="tools">
+      <button class="btn" id="tb-rect"    onclick="setShape('rect')">▭ Rect</button>
+      <button class="btn" id="tb-circle"  onclick="setShape('circle')">◯ Circle</button>
+      <button class="btn" id="tb-tri"      onclick="setShape('tri')">△ Triangle</button>
+      <button class="btn" id="tb-line"    onclick="setShape('line')">╱ Line</button>
+    </div>
+    <div class="row2">
+      Size <input type="number" id="sh-sz" value="10" min="2" max="64">
+      <label style="display:flex;align-items:center;gap:4px;"><input type="checkbox" id="sh-fill" checked> Fill</label>
+    </div>
+    <div class="row2" style="margin-top:5px;">
+      <button class="btn" id="tb-shape-place" onclick="toggleShapeMode()">↖ Place</button>
+      <button class="btn" onclick="rotateShape()">↻ Rotate (<span id="sh-rot-val">0°</span>)</button>
+    </div>
+  </div>
+
+  <div class="box">
+    <h3>View</h3>
+    <div class="tools">
+      <button class="btn active" id="tb-seg"  onclick="toggleSegmented()">⊞ Grid Lines</button>
+      <button class="btn active" id="tb-nums" onclick="toggleNumbers()"># Numbers</button>
+      <button class="btn"        id="tb-dark" onclick="toggleDark()">☾ Dark</button>
+    </div>
+  </div>
+
+  <div class="box">
+    <h3>Actions</h3>
+    <div class="tools">
+      <button class="btn red" onclick="clearCanvas()">✕ Clear</button>
+      <button class="btn" onclick="copyAsm()">⎘ Copy ASM</button>
+    </div>
+  </div>
+</div>
+
+<div class="box" id="asm-box">
+  <h3>Assembly — live</h3>
+  <div id="asm-out">// Paint pixels to generate code</div>
+  <div id="asm-stats"></div>
+</div>
+
+<div class="box" id="graphics-panel">
+  <h3>Render Matrix</h3>
+  <canvas id="anim-canvas"></canvas>
+</div>
+
+<script>
+const COLS=64,ROWS=64,FB=16384,SZ=8;
+const pixels=new Array(ROWS*COLS).fill(null);
+let tool='draw',painting=false,brushSize=1;
+let charMode=false,shapeMode=false,activeShape='rect',shapeRotation=0;
+let showSeg=true,showNums=true,darkMode=false;
+
+const F={
+  ' ':[0,0,0,0,0,0,0],
+  '!':[0x04,0x04,0x04,0x04,0x04,0x00,0x04],
+  '"':[0x0A,0x0A,0x00,0x00,0x00,0x00,0x00],
+  '#':[0x00,0x0A,0x1F,0x0A,0x1F,0x0A,0x00],
+  '$':[0x04,0x0F,0x10,0x0E,0x01,0x1E,0x04],
+  '%':[0x11,0x09,0x02,0x04,0x09,0x11,0x00],
+  '&':[0x08,0x14,0x08,0x15,0x12,0x0D,0x00],
+  "'":[0x04,0x04,0x00,0x00,0x00,0x00,0x00],
+  '(':[0x02,0x04,0x08,0x08,0x08,0x04,0x02],
+  ')':[0x08,0x04,0x02,0x02,0x02,0x04,0x08],
+  '*':[0x00,0x11,0x0A,0x1F,0x0A,0x11,0x00],
+  '+':[0x00,0x04,0x04,0x1F,0x04,0x04,0x00],
+  ',':[0x00,0x00,0x00,0x00,0x04,0x04,0x08],
+  '-':[0x00,0x00,0x00,0x1F,0x00,0x00,0x00],
+  '.':[0x00,0x00,0x00,0x00,0x00,0x06,0x06],
+  '/':[0x01,0x01,0x02,0x04,0x08,0x10,0x10],
+  '0':[0x0E,0x11,0x13,0x15,0x19,0x11,0x0E],
+  '1':[0x04,0x0C,0x04,0x04,0x04,0x04,0x0E],
+  '2':[0x0E,0x11,0x01,0x06,0x08,0x10,0x1F],
+  '3':[0x0E,0x11,0x01,0x06,0x01,0x11,0x0E],
+  '4':[0x02,0x06,0x0A,0x12,0x1F,0x02,0x02],
+  '5':[0x1F,0x10,0x1E,0x01,0x01,0x11,0x0E],
+  '6':[0x06,0x08,0x10,0x1E,0x11,0x11,0x0E],
+  '7':[0x1F,0x01,0x02,0x04,0x08,0x08,0x08],
+  '8':[0x0E,0x11,0x11,0x0E,0x11,0x11,0x0E],
+  '9':[0x0E,0x11,0x11,0x0F,0x01,0x02,0x0C],
+  ':':[0x00,0x06,0x06,0x00,0x06,0x06,0x00],
+  ';':[0x00,0x06,0x06,0x00,0x06,0x04,0x08],
+  '<':[0x01,0x02,0x04,0x08,0x04,0x02,0x01],
+  '=':[0x00,0x00,0x1F,0x00,0x1F,0x00,0x00],
+  '>':[0x10,0x08,0x04,0x02,0x04,0x08,0x10],
+  '?':[0x0E,0x11,0x01,0x02,0x04,0x00,0x04],
+  '@':[0x0E,0x11,0x17,0x15,0x17,0x10,0x0E],
+  'A':[0x04,0x0A,0x11,0x1F,0x11,0x11,0x11], 
+  'B':[0x1E,0x11,0x11,0x1E,0x11,0x11,0x1E], 
+  'C':[0x0E,0x11,0x10,0x10,0x10,0x11,0x0E],
+  'D':[0x1E,0x11,0x11,0x11,0x11,0x11,0x1E],
+  'E':[0x1F,0x10,0x10,0x1C,0x10,0x10,0x1F],
+  'F':[0x1F,0x10,0x10,0x1C,0x10,0x10,0x10],
+  'G':[0x0E,0x11,0x10,0x17,0x11,0x11,0x0E],
+  'H':[0x11,0x11,0x11,0x1F,0x11,0x11,0x11],
+  'I':[0x1F,0x04,0x04,0x04,0x04,0x04,0x1F],
+  'J':[0x1F,0x02,0x02,0x02,0x02,0x12,0x0C],
+  'K':[0x11,0x12,0x14,0x18,0x14,0x12,0x11],
+  'L':[0x10,0x10,0x10,0x10,0x10,0x10,0x1F],
+  'M':[0x11,0x1B,0x15,0x11,0x11,0x11,0x11],
+  'N':[0x11,0x19,0x15,0x13,0x11,0x11,0x11],
+  'O':[0x0E,0x11,0x11,0x11,0x11,0x11,0x0E],
+  'P':[0x1E,0x11,0x11,0x1E,0x10,0x10,0x10],
+  'Q':[0x0E,0x11,0x11,0x11,0x15,0x12,0x0D],
+  'R':[0x1E,0x11,0x11,0x1E,0x14,0x12,0x11],
+  'S':[0x0E,0x11,0x10,0x0E,0x01,0x11,0x0E],
+  'T':[0x1F,0x04,0x04,0x04,0x04,0x04,0x04],
+  'U':[0x11,0x11,0x11,0x11,0x11,0x11,0x0E],
+  'V':[0x11,0x11,0x11,0x11,0x0A,0x0A,0x04],
+  'W':[0x11,0x11,0x11,0x15,0x15,0x0A,0x0A],
+  'X':[0x11,0x11,0x0A,0x04,0x0A,0x11,0x11],
+  'Y':[0x11,0x11,0x0A,0x04,0x04,0x04,0x04],
+  'Z':[0x1F,0x01,0x02,0x04,0x08,0x10,0x1F],
+  'a':[0x00,0x00,0x0C,0x02,0x0E,0x12,0x0E],
+  'b':[0x10,0x10,0x1C,0x12,0x12,0x12,0x1C],
+  'c':[0x00,0x00,0x0E,0x10,0x10,0x10,0x0E],
+  'd':[0x02,0x02,0x0E,0x12,0x12,0x12,0x0E],
+  'e':[0x00,0x00,0x0C,0x12,0x1E,0x10,0x0E],
+  'f':[0x06,0x08,0x1E,0x08,0x08,0x08,0x00],
+  'g':[0x00,0x00,0x0E,0x12,0x12,0x0E,0x02],
+  'h':[0x10,0x10,0x1C,0x12,0x12,0x12,0x12],
+  'i':[0x00,0x04,0x00,0x0C,0x04,0x04,0x0E],
+  'j':[0x00,0x02,0x00,0x06,0x02,0x02,0x0C],
+  'k':[0x10,0x10,0x12,0x14,0x1C,0x12,0x12],
+  'l':[0x0C,0x04,0x04,0x04,0x04,0x04,0x0E],
+  'm':[0x00,0x00,0x1A,0x15,0x15,0x11,0x11],
+  'n':[0x00,0x00,0x1C,0x12,0x12,0x12,0x12],
+  'o':[0x00,0x00,0x0C,0x12,0x12,0x12,0x0C],
+  'p':[0x00,0x00,0x1C,0x12,0x12,0x1C,0x10],
+  'q':[0x00,0x00,0x0E,0x12,0x12,0x0E,0x02],
+  'r':[0x00,0x00,0x16,0x18,0x10,0x10,0x10],
+  's':[0x00,0x00,0x0E,0x10,0x0C,0x02,0x1C],
+  't':[0x08,0x08,0x1C,0x08,0x08,0x08,0x06],
+  'u':[0x00,0x00,0x12,0x12,0x12,0x12,0x0E],
+  'v':[0x00,0x00,0x12,0x12,0x12,0x0A,0x04],
+  'w':[0x00,0x00,0x11,0x11,0x15,0x15,0x0A],
+  'x':[0x00,0x00,0x12,0x0A,0x04,0x0A,0x12],
+  'y':[0x00,0x00,0x12,0x12,0x0E,0x02,0x0C],
+  'z':[0x00,0x00,0x1E,0x02,0x04,0x08,0x1E],
+  '[':[0x06,0x04,0x04,0x04,0x04,0x04,0x06],
+  '\\':[0x10,0x10,0x08,0x04,0x02,0x01,0x01],
+  ']':[0x0C,0x04,0x04,0x04,0x04,0x04,0x0C],
+  '^':[0x04,0x0A,0x00,0x00,0x00,0x00,0x00],
+  '_':[0x00,0x00,0x00,0x00,0x00,0x00,0x1F],
+  '`':[0x08,0x04,0x00,0x00,0x00,0x00,0x00],
+  '{':[0x02,0x04,0x04,0x08,0x04,0x04,0x02],
+  '|':[0x04,0x04,0x04,0x04,0x04,0x04,0x04],
+  '}':[0x08,0x04,0x04,0x02,0x04,0x04,0x08],
+  '~':[0x00,0x08,0x15,0x02,0x00,0x00,0x00],
+};
+
+const sel=document.getElementById('char-select');
+for(const ch of Object.keys(F)){
+  const o=document.createElement('option');
+  o.value=ch; o.textContent=ch===' '?'SPC':ch; sel.appendChild(o);
+}
+sel.value='A';
+
+const rowNums=document.getElementById('row-nums');
+for(let r=0;r<ROWS;r++){const s=document.createElement('span');s.style.height='8px';s.style.lineHeight='8px';s.textContent=(r%4===0||r===ROWS-1)?r:'';rowNums.appendChild(s);}
+const colNums=document.getElementById('col-nums');
+for(let c=0;c<COLS;c++){const s=document.createElement('span');s.textContent=(c%4===0||c===COLS-1)?c:'';colNums.appendChild(s);}
+
+const gridEl=document.getElementById('grid');
+const cells=[];
+for(let i=0;i<ROWS*COLS;i++){const d=document.createElement('div');d.className='px';cells.push(d);gridEl.appendChild(d);}
+
+const overlay=document.getElementById('overlay');
+const container=document.getElementById('canvas-container');
+
+function getPos(e){const r=container.getBoundingClientRect();return{col:Math.floor((e.clientX-r.left)/SZ),row:Math.floor((e.clientY-r.top)/SZ)};}
+
+container.addEventListener('mousemove',e=>{
+  const{col,row}=getPos(e);
+  if(col<0||col>=COLS||row<0||row>=ROWS){clearOverlay();return;}
+  updateCoords(col,row,row*COLS+col);
+  if(charMode) drawCharGhost(col,row);
+  else if(shapeMode) drawShapeGhost(col,row);
+  else{clearOverlay();if(painting)applyDraw(row*COLS+col);}
+});
+container.addEventListener('mousedown',e=>{
+  e.preventDefault();
+  const{col,row}=getPos(e);
+  if(col<0||col>=COLS||row<0||row>=ROWS) return;
+  if(charMode){stampChar(col,row);return;}
+  if(shapeMode){stampShape(col,row);return;}
+  painting=true; applyDraw(row*COLS+col);
+});
+container.addEventListener('mouseleave',()=>clearOverlay());
+document.addEventListener('mouseup',()=>painting=false);
+
+function hexToRGB(h){const n=parseInt(h.slice(1),16);return[(n>>16)&255,(n>>8)&255,n&255];}
+function rgbToRGB565(r,g,b){return(((r>>3)&0x1F)<<11)|(((g>>2)&0x3F)<<5)|((b>>3)&0x1F);}
+function rgb565ToCSS(v){const r=((v>>11)&0x1F)*255/31|0,g=((v>>5)&0x3F)*255/63|0,b=(v&0x1F)*255/31|0;return`rgb(${r},${g},${b})`;}
+function getColor565(){const[r,g,b]=hexToRGB(document.getElementById('cpick').value);return rgbToRGB565(r,g,b);}
+function getColorCSS(){const v=getColor565();return rgb565ToCSS(v);}
+
+document.getElementById('cpick').addEventListener('input',updateColorInfo);
+function updateColorInfo(){
+  const v=getColor565();
+  document.getElementById('ci-565').textContent='0x'+v.toString(16).toUpperCase().padStart(4,'0');
+  document.getElementById('ci-dec').textContent=v;
+  document.getElementById('ci-bin').textContent=v.toString(2).padStart(16,'0');
+}
+updateColorInfo();
+
+function setTool(t){
+  if(charMode) toggleCharMode();
+  if(shapeMode) toggleShapeMode();
+  tool=t;
+  ['draw','erase','fill'].forEach(x=>document.getElementById('tb-'+x).classList.toggle('active',x===t));
+}
+document.getElementById('brush').addEventListener('input',function(){brushSize=+this.value;document.getElementById('bsz').textContent=this.value+'px';});
+
+function setPixel(idx,color){if(idx<0||idx>=ROWS*COLS)return;pixels[idx]=color;cells[idx].style.background=color===null?'':rgb565ToCSS(color);}
+
+function applyDraw(idx){
+  if(tool==='fill'){floodFill(idx);updateAsm();return;}
+  const row=idx/COLS|0,col=idx%COLS,half=brushSize>>1;
+  for(let dr=-half;dr<=brushSize-1-half;dr++)
+    for(let dc=-half;dc<=brushSize-1-half;dc++){
+      const r2=row+dr,c2=col+dc;
+      if(r2<0||r2>=ROWS||c2<0||c2>=COLS)continue;
+      const i2=r2*COLS+c2;
+      if(tool==='draw')setPixel(i2,getColor565());
+      else setPixel(i2,null);
+    }
+  updateAsm();
+}
+
+function floodFill(start){
+  const target=pixels[start],fill=getColor565();
+  if(target===fill)return;
+  const stack=[start],visited=new Set();
+  while(stack.length){
+    const i=stack.pop();
+    if(visited.has(i)||i<0||i>=ROWS*COLS||pixels[i]!==target)continue;
+    visited.add(i);setPixel(i,fill);
+    const r=i/COLS|0,c=i%COLS;
+    if(c>0)stack.push(i-1);if(c<COLS-1)stack.push(i+1);
+    if(r>0)stack.push(i-COLS);if(r<ROWS-1)stack.push(i+COLS);
+  }
+}
+
+function charStartCol(col){return Math.max(0,Math.min(col,COLS-6));}
+function charStartRow(row){return Math.max(0,Math.min(row,ROWS-8));}
+
+function drawCharGhost(col,row){
+  const ch=sel.value,bm=F[ch];
+  const sc=charStartCol(col),sr=charStartRow(row);
+  const cc=getColorCSS();
+  let s='';
+  for(let r=0;r<7;r++)for(let c=0;c<5;c++){
+    if((bm[r]>>(4-c))&1)
+      s+=`<rect x="${(sc+c)*SZ}" y="${(sr+r)*SZ}" width="${SZ}" height="${SZ}" fill="${cc}" opacity=".55"/>`;
+  }
+  s+=`<rect x="${sc*SZ}" y="${sr*SZ}" width="${6*SZ}" height="${8*SZ}" fill="none" stroke="#3399ff" stroke-width="1.5" stroke-dasharray="3,2"/>`;
+  overlay.innerHTML=s;
+}
+
+function stampChar(col,row){
+  const ch=sel.value,bm=F[ch],color=getColor565();
+  const sc=charStartCol(col),sr=charStartRow(row);
+  for(let r=0;r<8;r++) {
+    for(let c=0;c<6;c++) {
+      setPixel((sr+r)*COLS+(sc+c), null);
+    }
+  }
+  for(let r=0;r<7;r++) for(let c=0;c<5;c++)
+    if((bm[r]>>(4-c))&1)setPixel((sr+r)*COLS+(sc+c),color);
+  updateAsm();
+}
+
+function toggleCharMode(){
+  charMode=!charMode;
+  if(shapeMode&&charMode){shapeMode=false;document.getElementById('tb-shape-place').classList.remove('active');['rect','circle','tri','line'].forEach(s=>document.getElementById('tb-'+s).classList.remove('active'));}
+  document.getElementById('tb-char').classList.toggle('active',charMode);
+  gridEl.style.cursor=charMode?'none':'crosshair';
+  if(!charMode)clearOverlay();
+}
+
+function setShape(s){
+  activeShape=s;
+  ['rect','circle','tri','line'].forEach(x=>document.getElementById('tb-'+x).classList.toggle('active',x===s));
+  if(!shapeMode){toggleShapeMode();}
+}
+
+function getShapeSize(){return Math.max(2,Math.min(64,+document.getElementById('sh-sz').value||10));}
+function isFilled(){return document.getElementById('sh-fill').checked;}
+
+function rotateShape() {
+  shapeRotation = (shapeRotation + 90) % 360;
+  document.getElementById('sh-rot-val').textContent = shapeRotation + '°';
+}
+
+function shapePixels(col,row){
+  const sz=getShapeSize(),fill=isFilled(),pts=[];
+  const cx=col,cy=row;
+  const radius=Math.floor(sz/2);
+
+  if(activeShape==='rect'){
+    const x0=cx-radius, y0=cy-radius;
+    const x1=x0+sz-1, y1=y0+sz-1;
+    for(let rr=y0;rr<=y1;rr++)for(let cc=x0;cc<=x1;cc++){
+      if(fill||(rr===y0||rr===y1||cc===x0||cc===x1))pts.push({r:rr,c:cc});
+    }
+  } else if(activeShape==='circle'){
+    const rX=sz/2, rY=sz/2;
+    for(let rr=-Math.ceil(rY);rr<=Math.ceil(rY);rr++)for(let cc=-Math.ceil(rX);cc<=Math.ceil(rX);cc++){
+      const nx=cc/rX, ny=rr/rY;
+      const dist=nx*nx+ny*ny;
+      if(fill ? dist<=1.05 : (dist>=0.72&&dist<=1.12))pts.push({r:cy+rr,c:cx+cc});
+    }
+  } else if(activeShape==='tri'){
+    const x0=cx-radius, y0=cy-radius;
+    for(let rIdx=0;rIdx<sz;rIdx++){
+      const prog=sz>1?rIdx/(sz-1):1;
+      const curW=prog*sz;
+      const offset=(sz-curW)/2;
+      const startC=Math.round(x0+offset);
+      const endC=Math.round(x0+offset+curW-1);
+      if(fill){
+        for(let cc=startC;cc<=endC;cc++)pts.push({r:y0+rIdx,c:cc});
+      }else{
+        pts.push({r:y0+rIdx,c:startC});
+        pts.push({r:y0+rIdx,c:endC});
+        if(rIdx===sz-1)for(let cc=startC;cc<=endC;cc++)pts.push({r:y0+rIdx,c:cc});
+      }
+    }
+  } else if(activeShape==='line'){
+    const x0=cx-radius, y0=cy-radius;
+    for(let i=0;i<=sz;i++){
+      const t=sz>0?i/sz:0;
+      pts.push({r:Math.round(y0+t*(sz-1)),c:Math.round(x0+t*(sz-1))});
+    }
+  }
+
+  if (shapeRotation === 0) {
+    return pts.filter(p=>p.r>=0&&p.r<ROWS&&p.c>=0&&p.c<COLS);
+  }
+  
+  const rotatedPts = pts.map(p => {
+    const dx = p.c - cx;
+    const dy = p.r - cy;
+    let rxPt = dx, ryPt = dy;
+    if (shapeRotation === 90) { rxPt = -dy; ryPt = dx; }
+    else if (shapeRotation === 180) { rxPt = -dx; ryPt = -dy; }
+    else if (shapeRotation === 270) { rxPt = dy; ryPt = -dx; }
+    return { r: cy + ryPt, c: cx + rxPt };
+  });
+
+  return rotatedPts.filter(p=>p.r>=0&&p.r<ROWS&&p.c>=0&&p.c<COLS);
+}
+
+function drawShapeGhost(col,row){
+  const pts=shapePixels(col,row),cc=getColorCSS();
+  if(pts.length === 0) return;
+  
+  let minC = 64, maxC = -1, minR = 64, maxR = -1;
+  let s='';
+  for(const p of pts) {
+    if(p.c < minC) minC = p.c; if(p.c > maxC) maxC = p.c;
+    if(p.r < minR) minR = p.r; if(p.r > maxR) maxR = p.r;
+    s+=`<rect x="${p.c*SZ}" y="${p.r*SZ}" width="${SZ}" height="${SZ}" fill="${cc}" opacity=".5"/>`;
+  }
+  
+  const bx = minC * SZ, by = minR * SZ;
+  const bw = (maxC - minC + 1) * SZ, bh = (maxR - minR + 1) * SZ;
+  
+  s+=`<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" fill="none" stroke="#ff9900" stroke-width="1.5" stroke-dasharray="4,2"/>`;
+  s+=`<rect x="${col*SZ}" y="${row*SZ}" width="${SZ}" height="${SZ}" fill="none" stroke="#ff4444" stroke-width="1.5"/>`;
+  overlay.innerHTML=s;
+}
+
+function stampShape(col,row){
+  const pts=shapePixels(col,row),color=getColor565();
+  for(const p of pts)setPixel(p.r*COLS+p.c,color);
+  updateAsm();
+}
+
+function toggleShapeMode(){
+  shapeMode=!shapeMode;
+  if(charMode&&shapeMode){charMode=false;document.getElementById('tb-char').classList.remove('active');}
+  document.getElementById('tb-shape-place').classList.toggle('active',shapeMode);
+  gridEl.style.cursor=shapeMode?'none':'crosshair';
+  if(!shapeMode)clearOverlay();
+}
+
+function toggleSegmented(){showSeg=!showSeg;gridEl.classList.toggle('segmented',showSeg);document.getElementById('tb-seg').classList.toggle('active',showSeg);}
+function toggleNumbers(){showNums=!showNums;document.getElementById('row-nums').style.visibility=showNums?'visible':'hidden';document.getElementById('col-nums').style.visibility=showNums?'visible':'hidden';document.getElementById('tb-nums').classList.toggle('active',showNums);}
+function toggleDark(){
+  darkMode=!darkMode;
+  document.body.classList.toggle('dark',darkMode);
+  document.getElementById('tb-dark').textContent=darkMode?'☀ Light':'☾ Dark';
+  document.getElementById('tb-dark').classList.toggle('active',darkMode);
+}
+
+function clearCanvas(){pixels.fill(null);cells.forEach(c=>c.style.background='');updateAsm();}
+function clearOverlay(){overlay.innerHTML='';}
+
+function updateCoords(col,row,i){
+  const v=pixels[i],addr=FB+i;
+  document.getElementById('coords').textContent=`x=${col}  y=${row}  |  addr=${addr}`+(v!==null?`  |  0x${v.toString(16).toUpperCase().padStart(4,'0')}` :'');
+}
+
+function updateAsm(){
+  const painted=[];
+  for(let i=0; i<pixels.length; i++)if(pixels[i]!==null)painted.push([i,pixels[i]]);
+  const stats=document.getElementById('asm-stats');
+  if(!painted.length){document.getElementById('asm-out').textContent='// Paint pixels to generate code';stats.textContent='';return;}
+  const byColor=new Map();
+  for(const[idx,color]of painted){if(!byColor.has(color))byColor.set(color,[]);byColor.get(color).push(idx);}
+  const lines=[`// RGB565 Bitmap — ${painted.length} pixel(s)`,`// Framebuffer base: ${FB}`,``];
+  for(const[color,indices]of byColor){
+    lines.push(`// Color 0x${color.toString(16).toUpperCase().padStart(4,'0')} — ${indices.length} px`);
+    lines.push(`@${color}`,`D=A`);
+    for(const idx of indices){lines.push(`@${FB+idx}`,`M=D`);}
+    lines.push('');
+  }
+  lines.push('(END)','@END','0;JMP');
+  document.getElementById('asm-out').textContent=lines.join('\n');
+  stats.textContent=`${painted.length} px  |  ${byColor.size} color(s)  |  ${lines.length} lines`;
+}
+
+function blinkManualAddress() {
+  const rawInput = document.getElementById('manual-addr-input').value.trim();
+  const inputAddr = parseInt(rawInput, 10);
+  
+  if (isNaN(inputAddr) || inputAddr < FB || inputAddr >= (FB + ROWS * COLS)) {
+    alert(`Please enter a valid framebuffer address between ${FB} and ${FB + ROWS * COLS - 1}`);
+    return;
+  }
+  
+  const idx = inputAddr - FB;
+  const col = idx % COLS; 
+  const row = Math.floor(idx / COLS);
+  
+  let count = 0;
+  const interval = setInterval(() => {
+    if (count % 2 === 0) {
+      overlay.innerHTML = `<rect x="${col*SZ}" y="${row*SZ}" width="${SZ}" height="${SZ}" fill="#00ffff" stroke="#ffffff" stroke-width="1.5"/>`;
+    } else { overlay.innerHTML = ''; }
+    count++; if (count >= 6) { clearInterval(interval); overlay.innerHTML = ''; }
+  }, 200);
+}
+
+function copyAsm(){
+  navigator.clipboard.writeText(document.getElementById('asm-out').textContent).then(()=>{
+    const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);
+  });
+}
+
+/* Tesseract (4D Hypercube) Wireframe Projection Animation */
+const canvas = document.getElementById('anim-canvas');
+const ctx = canvas.getContext('2d');
+function resizeAnimCanvas() { canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight; }
+window.addEventListener('resize', resizeAnimCanvas);
+resizeAnimCanvas();
+
+// Generate coordinates for all 16 vertices of a 4D hypercube (-1 or 1)
+const vertices = [];
+for (let i = 0; i < 16; i++) {
+  vertices.push([
+    (i & 1) ? 1 : -1,
+    (i & 2) ? 1 : -1,
+    (i & 4) ? 1 : -1,
+    (i & 8) ? 1 : -1
+  ]);
+}
+
+// Map links between vertices that differ by exactly one bit (along 4 axes)
+const edges = [];
+for (let i = 0; i < 16; i++) {
+  for (let j = i + 1; j < 16; j++) {
+    let diff = i ^ j;
+    if (diff && (diff & (diff - 1)) === 0) edges.push([i, j]);
+  }
+}
+
+let angleX = 0, angleY = 0, angleZ = 0, angleW = 0;
+
+function projectAndDraw() {
+  ctx.fillStyle = '#050508';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+  const projected = [];
+
+  // Update multidimensional rotation rates
+  angleX += 0.011; angleY += 0.014; angleZ += 0.008; angleW += 0.018;
+
+  for (let i = 0; i < 16; i++) {
+    let [x, y, z, w] = vertices[i];
+
+    // 4D Rotations (Hyperplane rotations)
+    // Rotation in XW plane
+    let x1 = x * Math.cos(angleW) - w * Math.sin(angleW);
+    let w1 = x * Math.sin(angleW) + w * Math.cos(angleW);
+    
+    // Rotation in YW plane
+    let y1 = y * Math.cos(angleW * 0.7) - w1 * Math.sin(angleW * 0.7);
+    let w2 = y * Math.sin(angleW * 0.7) + w1 * Math.cos(angleW * 0.7);
+
+    // Standard 3D Rotations
+    // XY Rotation
+    let x2 = x1 * Math.cos(angleX) - y1 * Math.sin(angleX);
+    let y2 = x1 * Math.sin(angleX) + y1 * Math.cos(angleX);
+    // YZ Rotation
+    let y3 = y2 * Math.cos(angleY) - z * Math.sin(angleY);
+    let z1 = y2 * Math.sin(angleY) + z * Math.cos(angleY);
+    // XZ Rotation
+    let x3 = x2 * Math.cos(angleZ) - z1 * Math.sin(angleZ);
+    let z2 = x2 * Math.sin(angleZ) + z1 * Math.cos(angleZ);
+
+    // Perspective projection from 4D down to 3D space
+    const distance4D = 2.2;
+    const factor4D = 1 / (distance4D - w2);
+    const x3D = x3 * factor4D;
+    const y3D = y3 * factor4D;
+    const z3D = z2 * factor4D;
+
+    // Perspective projection from 3D down to 2D screen viewport
+    const distance3D = 2.0;
+    const factor2D = 1 / (distance3D - z3D);
+    const screenScale = Math.min(canvas.width, canvas.height) * 1.3;
+    
+    projected.push({
+      x: cx + x3D * factor2D * screenScale,
+      y: cy + y3D * factor2D * screenScale,
+      wDepth: w2 // Save depth reference for contextual line styling
+    });
+  }
+
+  // Render wireframe edges
+  ctx.lineWidth = 1.2;
+  for (const [start, end] of edges) {
+    const p1 = projected[start];
+    const p2 = projected[end];
+    
+    // Blend depth variations cleanly to emphasize the shifting geometry
+    const avgW = (p1.wDepth + p2.wDepth) / 2;
+    const alpha = (avgW + 1.4) / 2.8; // Normalized range constraint
+    
+    ctx.strokeStyle = `rgba(100, 160, 255, ${Math.max(0.15, Math.min(0.9, alpha))})`;
+    ctx.beginPath();
+    ctx.moveTo(p1.x, p1.y);
+    ctx.lineTo(p2.x, p2.y);
+    ctx.stroke();
+  }
+
+  // Render vertex nodes
+  for (const p of projected) {
+    ctx.fillStyle = '#ffaa33';
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 2.5, 0, 2 * Math.PI);
+    ctx.fill();
+  }
+
+  requestAnimationFrame(projectAndDraw);
+}
+projectAndDraw();
+
+gridEl.classList.add('segmented');
+</script>
+</body>
+</html>
