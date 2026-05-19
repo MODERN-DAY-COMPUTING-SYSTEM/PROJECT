@@ -352,6 +352,9 @@
       <a name="fanout" val="16"/>
       <a name="incoming" val="16"/>
     </comp>
+    <comp lib="0" loc="(3810,1530)" name="Constant">
+      <a name="value" val="0x0"/>
+    </comp>
     <comp lib="0" loc="(400,1850)" name="Splitter">
       <a name="fanout" val="6"/>
       <a name="incoming" val="6"/>
@@ -541,6 +544,11 @@
       <a name="group" val="6"/>
       <a name="width" val="16"/>
     </comp>
+    <comp lib="2" loc="(3820,1540)" name="BitSelector">
+      <a name="facing" val="south"/>
+      <a name="group" val="15"/>
+      <a name="width" val="16"/>
+    </comp>
     <comp lib="2" loc="(680,1290)" name="Multiplexer">
       <a name="width" val="16"/>
     </comp>
@@ -578,8 +586,61 @@
       <a name="addrWidth" val="15"/>
       <a name="appearance" val="logisim_evolution"/>
       <a name="contents">addr/data: 15 16
-5001 fc10 41 e4d0 8 e302 0 ea87
-8 ea87
+3da1 ec10 404b e308 405d e308 4087 e308
+4088 e308 4092 e308 409a e308 409f e308
+40a3 e308 40a4 e308 40ad e308 40b0 e308
+40cd e308 4174 e308 4182 e308 41ef e308
+4200 e308 42b7 e308 4372 e308 43b2 e308
+43f2 e308 4433 e308 4439 e308 4477 e308
+4479 e308 5af ec10 407c e308 423d e308
+4255 e308 425b e308 427d e308 4289 e308
+4301 e308 431f e308 43ca e308 43d2 e308
+440a e308 4429 e308 447f e308 4498 e308
+44a0 e308 44bc e308 44ec e308 4526 e308
+452d e308 456a e308 45ad e308 45b4 e308
+45e9 e308 45f6 e308 45f9 e308 4617 e308
+4620 e308 466f e308 46d0 e308 46d1 e308
+46e2 e308 46eb e308 46fe e308 4750 e308
+475e e308 47b2 e308 47d4 e308 4897 e308
+48d9 e308 49ce e308 49fa e308 4a12 e308
+4acb e308 4aff e308 4b0c e308 4b3f e308
+19e1 ec10 40bf e308 413a e308 413b e308
+4365 e308 4366 e308 43ef e308 4411 e308
+4412 e308 4415 e308 4455 e308 445f e308
+44a4 e308 44e9 e308 45f0 e308 4623 e308
+4631 e308 4670 e308 4685 e308 4689 e308
+469b e308 47a2 e308 4815 e308 48a2 e308
+4962 e308 49a2 e308 49e2 e308 4a61 e308
+4a9e e308 4ae1 e308 4b20 e308 4b60 e308
+35f ec10 4263 e308 4264 e308 42e6 e308
+435d e308 435e e308 4389 e308 439c e308
+4457 e308 4491 e308 4499 e308 44d9 e308
+4511 e308 451b e308 455b e308 4597 e308
+45cb e308 45d8 e308 45dc e308 4603 e308
+4619 e308 462c e308 4659 e308 469e e308
+46c4 e308 472d e308 4794 e308 479f e308
+47df e308 481c e308 48a4 e308 48ea e308
+48ec e308 491d e308 49e0 e308 4a99 e308
+4b24 e308 4cd5 e308 4d42 e308 4ed3 e308
+4f0b e308 4f53 e308 4f90 e308 4f92 e308
+7c00 ec10 4565 e308 4566 e308 45e3 e308
+481d e308 499d e308 49da e308 49dd e308
+4a1d e308 4a59 e308 4a98 e308 4b5c e308
+4c17 e308 4c59 e308 4c96 e308 4cd7 e308
+5e1 ec10 466d e308 466e e308 46ab e308
+46ae e308 4761 e308 47ac e308 482c e308
+4855 e308 48ac e308 48ad e308 4923 e308
+492e e308 4961 e308 4a11 e308 4a15 e308
+4a51 e308 4a86 e308 4a8a e308 4ac7 e308
+4ad3 e308 4ae5 e308 4b30 e308 4b65 e308
+4b8f e308 4b99 e308 4b9b e308 4ba3 e308
+4bb0 e308 4c1c e308 4d30 e308 4de7 e308
+4df0 e308 4e2c e308 4e2e e308 4e2f e308
+5c72 ec10 4b78 e308 4bb6 e308 4bb7 e308
+4c33 e308 4c71 e308 4cee e308 4d2d e308
+4d6d e308 4dae e308 4daf e308 4dc0 e308
+4dda e308 4de6 e308 4dea e308 4def e308
+4eca e308 4ef1 e308 4fdf e308 1b6 ea87
 </a>
       <a name="dataWidth" val="16"/>
     </comp>
@@ -631,7 +692,7 @@
     <comp lib="5" loc="(3750,2030)" name="Button"/>
     <comp lib="5" loc="(3750,2050)" name="Button"/>
     <comp lib="5" loc="(3920,1770)" name="RGB Video">
-      <a name="color" val="565 RGB (16 bit)"/>
+      <a name="color" val="555 RGB (15 bit)"/>
       <a name="height" val="64"/>
       <a name="scale" val="8"/>
       <a name="width" val="64"/>
@@ -814,7 +875,7 @@
     <comp lib="8" loc="(3225,870)" name="Text">
       <a name="text" val="ALU output"/>
     </comp>
-    <comp lib="8" loc="(3271,2111)" name="Text">
+    <comp lib="8" loc="(3270,2110)" name="Text">
       <a name="color" val="#7b807e"/>
       <a name="font" val="BigBlueTerm437 Nerd Font bold 16"/>
       <a name="text" val="HARVARD ARCHITECTURE"/>
@@ -897,14 +958,14 @@
       <a name="font" val="SansSerif bold 12"/>
       <a name="text" val="Keyboard Line"/>
     </comp>
+    <comp lib="8" loc="(4195,1825)" name="Text">
+      <a name="font" val="SansSerif bold 10"/>
+      <a name="text" val="Keyboard "/>
+    </comp>
     <comp lib="8" loc="(4195,1850)" name="Text">
       <a name="color" val="#000064"/>
       <a name="font" val="SansSerif bold 12"/>
       <a name="text" val="Qwerty"/>
-    </comp>
-    <comp lib="8" loc="(4197,1828)" name="Text">
-      <a name="font" val="SansSerif bold 10"/>
-      <a name="text" val="Keyboard "/>
     </comp>
     <comp lib="8" loc="(425,1240)" name="Text">
       <a name="font" val="SansSerif plain 9"/>
@@ -1455,8 +1516,9 @@
     <wire from="(380,830)" to="(2890,830)"/>
     <wire from="(380,830)" to="(380,1050)"/>
     <wire from="(3810,1160)" to="(3810,1190)"/>
+    <wire from="(3820,1540)" to="(3820,1790)"/>
     <wire from="(3820,1790)" to="(3980,1790)"/>
-    <wire from="(3820,880)" to="(3820,1790)"/>
+    <wire from="(3820,880)" to="(3820,1510)"/>
     <wire from="(3850,1540)" to="(3850,1780)"/>
     <wire from="(3850,1780)" to="(3850,1850)"/>
     <wire from="(3850,1780)" to="(3930,1780)"/>
